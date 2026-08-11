@@ -19,7 +19,11 @@ public class InventarioService {
     }
 
     public List<Producto> productos(String filtro) throws DataAccessException {
-        return productoDAO.listar(filtro);
+        return productoDAO.listar(filtro, null);
+    }
+
+    public List<Producto> productos(String filtro, Integer categoriaId) throws DataAccessException {
+        return productoDAO.listar(filtro, categoriaId);
     }
 
     public void guardarCategoria(Categoria c) throws ValidationException, DataAccessException {
@@ -41,6 +45,9 @@ public class InventarioService {
         if (p.getNombre() == null || p.getNombre().trim().isEmpty()) {
             throw new ValidationException("El nombre del producto es obligatorio.");
         }
+        if (p.getSku() == null || p.getSku().trim().isEmpty()) {
+            throw new ValidationException("El código SKU es obligatorio.");
+        }
         if (p.getPrecio() < 0) {
             throw new ValidationException("El precio no puede ser negativo.");
         }
@@ -59,5 +66,27 @@ public class InventarioService {
 
     public void eliminarProducto(int id) throws DataAccessException {
         productoDAO.eliminar(id);
+    }
+
+    public void reabastecerProductos(List<Integer> ids, int cantidad)
+            throws ValidationException, DataAccessException {
+        if (ids.isEmpty()) {
+            throw new ValidationException("Seleccione al menos un producto.");
+        }
+        if (cantidad <= 0) {
+            throw new ValidationException("La cantidad debe ser mayor que cero.");
+        }
+        productoDAO.reabastecer(ids, cantidad);
+    }
+
+    public void cambiarPrecioProductos(List<Integer> ids, double precio)
+            throws ValidationException, DataAccessException {
+        if (ids.isEmpty()) {
+            throw new ValidationException("Seleccione al menos un producto.");
+        }
+        if (precio < 0) {
+            throw new ValidationException("El precio no puede ser negativo.");
+        }
+        productoDAO.cambiarPrecio(ids, precio);
     }
 }
