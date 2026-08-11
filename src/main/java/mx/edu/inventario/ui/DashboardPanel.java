@@ -92,7 +92,7 @@ public class DashboardPanel extends JPanel {
             super.paintComponent(g);
             g.setColor(new Color(91, 105, 112));
             g.setFont(getFont().deriveFont(Font.BOLD, 11f));
-            g.drawString("SALUD DEL STOCK", 10, 15);
+            g.drawString("ESTADO DEL STOCK", 10, 15);
             int max = Math.max(1, Math.max(critico, Math.max(advertencia, optimo)));
             dibujarBarra(g, "Crítico", critico, max, 31, ROJO);
             dibujarBarra(g, "Alerta", advertencia, max, 49, AMBAR);

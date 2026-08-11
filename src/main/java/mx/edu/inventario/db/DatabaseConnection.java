@@ -74,6 +74,7 @@ public final class DatabaseConnection {
             agregarColumnaSiFalta(c, "foto", "VARCHAR(500) NULL");
             st.executeUpdate("UPDATE productos SET sku = CONCAT('SKU-', LPAD(id, 5, '0')) "
                     + "WHERE sku IS NULL OR TRIM(sku) = ''");
+            SampleDataSeeder.insertar(c);
         } catch (SQLException e) {
             throw new DataAccessException("No se pudo preparar la base de datos.", e);
         }

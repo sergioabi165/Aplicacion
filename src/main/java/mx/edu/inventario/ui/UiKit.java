@@ -61,6 +61,7 @@ public final class UiKit {
             setContentAreaFilled(false);
             setBorderPainted(false);
             setFocusPainted(false);
+            setForeground(colorDeTexto(normal));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             animacion = new Timer(16, e -> animar());
             addMouseListener(new MouseAdapter() {
@@ -99,6 +100,12 @@ public final class UiKit {
             int g = (int) (desde.getGreen() + (hasta.getGreen() - desde.getGreen()) * t);
             int b = (int) (desde.getBlue() + (hasta.getBlue() - desde.getBlue()) * t);
             return new Color(r, g, b);
+        }
+
+        private Color colorDeTexto(Color fondo) {
+            double luminosidad = 0.2126 * fondo.getRed() + 0.7152 * fondo.getGreen()
+                    + 0.0722 * fondo.getBlue();
+            return luminosidad > 165 ? new Color(42, 31, 82) : Color.WHITE;
         }
     }
 }

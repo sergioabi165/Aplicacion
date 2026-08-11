@@ -1,6 +1,7 @@
 package mx.edu.inventario;
 
 import java.awt.Font;
+import java.awt.Color;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -19,6 +20,7 @@ public final class App {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             UIManager.put("defaultFont", new Font("Segoe UI", Font.PLAIN, 13));
             UIManager.put("ToolTip.font", new Font("Segoe UI", Font.PLAIN, 12));
+            UIManager.put("Button.foreground", new Color(42, 31, 82));
             SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "No fue posible iniciar la aplicación: " + e.getMessage(),

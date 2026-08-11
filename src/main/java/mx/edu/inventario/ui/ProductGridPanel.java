@@ -2,7 +2,6 @@ package mx.edu.inventario.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
@@ -19,7 +18,7 @@ public class ProductGridPanel extends JPanel {
     private final Consumer<Producto> onSelect;
 
     public ProductGridPanel(Consumer<Producto> onSelect) {
-        super(new FlowLayout(FlowLayout.LEFT, 14, 14));
+        super(new ResponsiveWrapLayout(ResponsiveWrapLayout.LEFT, 14, 14));
         this.onSelect = onSelect;
         setBackground(new Color(242, 242, 244));
         setBorder(BorderFactory.createEmptyBorder(4, 4, 20, 4));

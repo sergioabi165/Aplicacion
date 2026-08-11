@@ -108,7 +108,7 @@ public class MainFrame extends JFrame {
         marca.setFont(marca.getFont().deriveFont(Font.BOLD, 24f));
         panel.add(marca, BorderLayout.WEST);
 
-        JButton accion = boton("Registrar movimiento de inventario", NARANJA);
+        JButton accion = boton("Agregar existencias", NARANJA);
         accion.setFont(accion.getFont().deriveFont(Font.BOLD, 12f));
         accion.setPreferredSize(new Dimension(470, 34));
         accion.addActionListener(e -> reabastecerLote());
@@ -148,6 +148,8 @@ public class MainFrame extends JFrame {
         vistas.setForeground(MORADO);
         JScrollPane scrollCatalogo = new JScrollPane(catalogo);
         scrollCatalogo.setBorder(null);
+        scrollCatalogo.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollCatalogo.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollCatalogo.getVerticalScrollBar().setUnitIncrement(18);
         vistas.addTab("  Catálogo visual  ", scrollCatalogo);
         vistas.addTab("  Tabla de inventario  ", new JScrollPane(tabla));
@@ -184,6 +186,15 @@ public class MainFrame extends JFrame {
         tabla.getTableHeader().setBackground(MORADO);
         tabla.getTableHeader().setForeground(Color.WHITE);
         tabla.getTableHeader().setFont(new Font("Segoe UI Semibold", Font.BOLD, 13));
+        tabla.getTableHeader().setPreferredSize(new Dimension(0, 36));
+        DefaultTableCellRenderer encabezado = new DefaultTableCellRenderer();
+        encabezado.setOpaque(true);
+        encabezado.setBackground(MORADO);
+        encabezado.setForeground(Color.WHITE);
+        encabezado.setFont(new Font("Segoe UI Semibold", Font.BOLD, 13));
+        encabezado.setHorizontalAlignment(JLabel.CENTER);
+        encabezado.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 1, new Color(82, 58, 180)));
+        tabla.getTableHeader().setDefaultRenderer(encabezado);
         tabla.getColumn("Existencias").setCellRenderer(new StockCellRenderer());
         tabla.getColumn("Estado").setCellRenderer(new StockCellRenderer());
         DefaultTableCellRenderer precio = new DefaultTableCellRenderer() {

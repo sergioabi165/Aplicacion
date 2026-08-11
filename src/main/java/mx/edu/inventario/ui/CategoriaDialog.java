@@ -3,6 +3,7 @@ package mx.edu.inventario.ui;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -64,9 +65,9 @@ public class CategoriaDialog extends JDialog {
         add(new JScrollPane(tabla), BorderLayout.CENTER);
 
         JPanel botones = new JPanel();
-        JButton nuevo = new JButton("Nuevo");
-        JButton guardar = new JButton("Guardar");
-        JButton eliminar = new JButton("Eliminar");
+        JButton nuevo = crearBoton("Nuevo", new Color(36, 10, 155));
+        JButton guardar = crearBoton("Guardar", new Color(255, 107, 0));
+        JButton eliminar = crearBoton("Eliminar", new Color(181, 50, 57));
         nuevo.addActionListener(e -> limpiar());
         guardar.addActionListener(e -> guardar());
         eliminar.addActionListener(e -> eliminar());
@@ -74,6 +75,18 @@ public class CategoriaDialog extends JDialog {
         botones.add(guardar);
         botones.add(eliminar);
         add(botones, BorderLayout.SOUTH);
+    }
+
+    private JButton crearBoton(String texto, Color fondo) {
+        UiKit.HoverButton boton = new UiKit.HoverButton(texto, fondo, aclarar(fondo), 16);
+        boton.setForeground(Color.WHITE);
+        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        return boton;
+    }
+
+    private Color aclarar(Color color) {
+        return new Color(Math.min(255, color.getRed() + 24), Math.min(255, color.getGreen() + 24),
+                Math.min(255, color.getBlue() + 24));
     }
 
     private void seleccionar(int fila) {
