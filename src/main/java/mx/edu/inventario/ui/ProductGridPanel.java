@@ -3,14 +3,9 @@ package mx.edu.inventario.ui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,7 +19,7 @@ public class ProductGridPanel extends JPanel {
     private final Consumer<Producto> onSelect;
 
     public ProductGridPanel(Consumer<Producto> onSelect) {
-        super(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        super(new FlowLayout(FlowLayout.LEFT, 14, 14));
         this.onSelect = onSelect;
         setBackground(new Color(242, 242, 244));
         setBorder(BorderFactory.createEmptyBorder(4, 4, 20, 4));
@@ -45,40 +40,25 @@ public class ProductGridPanel extends JPanel {
     }
 
     private JButton crearTarjeta(Producto producto) {
-        JButton tarjeta = new JButton();
-        tarjeta.setPreferredSize(new Dimension(178, 184));
+        JButton tarjeta = new UiKit.HoverButton("", Color.WHITE, new Color(247, 244, 255), 18);
+        tarjeta.setPreferredSize(new Dimension(184, 118));
         tarjeta.setLayout(new java.awt.BorderLayout(0, 4));
-        tarjeta.setBackground(Color.WHITE);
-        tarjeta.setFocusPainted(false);
-        tarjeta.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        tarjeta.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(colorStock(producto.getExistencia()), 2),
-                BorderFactory.createEmptyBorder(5, 5, 6, 5)));
-
-        JLabel imagen = new JLabel(icono(producto), SwingConstants.CENTER);
-        imagen.setOpaque(true);
-        imagen.setBackground(new Color(237, 236, 243));
-        tarjeta.add(imagen, java.awt.BorderLayout.CENTER);
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(7, 7, 8, 7));
 
         String nombre = producto.getNombre().length() > 24
                 ? producto.getNombre().substring(0, 22) + "…" : producto.getNombre();
+        String colorEstado = String.format("#%02x%02x%02x", colorStock(producto.getExistencia()).getRed(),
+                colorStock(producto.getExistencia()).getGreen(), colorStock(producto.getExistencia()).getBlue());
         JLabel datos = new JLabel("<html><b>" + escapar(nombre) + "</b><br>"
                 + "<font color='#777777'>" + escapar(producto.getSku()) + " · Stock " + producto.getExistencia() + "</font><br>"
-                + "<font color='#240A9B'><b>$ " + String.format("%,.2f", producto.getPrecio()) + "</b></font></html>");
+                + "<font color='#240A9B'><b>$ " + String.format("%,.2f", producto.getPrecio()) + "</b></font>  "
+                + "<font color='" + colorEstado + "'>● " + estado(producto.getExistencia()) + "</font></html>");
         datos.setFont(datos.getFont().deriveFont(11f));
-        tarjeta.add(datos, java.awt.BorderLayout.SOUTH);
+        datos.setHorizontalAlignment(SwingConstants.LEFT);
+        tarjeta.add(datos, java.awt.BorderLayout.CENTER);
         tarjeta.setToolTipText(producto.getNombre() + " · " + estado(producto.getExistencia()));
         tarjeta.addActionListener(e -> onSelect.accept(producto));
         return tarjeta;
-    }
-
-    private javax.swing.Icon icono(Producto producto) {
-        if (producto.getFoto() != null && !producto.getFoto().isBlank()
-                && new File(producto.getFoto()).isFile()) {
-            Image original = new ImageIcon(producto.getFoto()).getImage();
-            return new ImageIcon(original.getScaledInstance(164, 112, Image.SCALE_SMOOTH));
-        }
-        return new PlaceholderIcon(producto.getNombre());
     }
 
     private Color colorStock(int stock) {
@@ -99,27 +79,4 @@ public class ProductGridPanel extends JPanel {
         return texto == null ? "" : texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
-    private static class PlaceholderIcon implements javax.swing.Icon {
-        private final String iniciales;
-
-        PlaceholderIcon(String nombre) {
-            String[] partes = nombre == null ? new String[0] : nombre.trim().split("\\s+");
-            iniciales = partes.length == 0 ? "P" : partes.length == 1
-                    ? partes[0].substring(0, 1).toUpperCase()
-                    : (partes[0].substring(0, 1) + partes[1].substring(0, 1)).toUpperCase();
-        }
-
-        @Override
-        public void paintIcon(java.awt.Component c, Graphics g, int x, int y) {
-            g.setColor(new Color(231, 228, 248));
-            g.fillRect(x, y, getIconWidth(), getIconHeight());
-            g.setColor(MORADO);
-            g.setFont(c.getFont().deriveFont(Font.BOLD, 32f));
-            java.awt.FontMetrics fm = g.getFontMetrics();
-            g.drawString(iniciales, x + (getIconWidth() - fm.stringWidth(iniciales)) / 2, y + 68);
-        }
-
-        @Override public int getIconWidth() { return 164; }
-        @Override public int getIconHeight() { return 112; }
-    }
 }

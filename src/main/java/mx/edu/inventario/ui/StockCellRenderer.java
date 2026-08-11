@@ -18,9 +18,10 @@ public class StockCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
                                                     boolean focused, int row, int column) {
         super.getTableCellRendererComponent(table, value, selected, focused, row, column);
-        int stock = (Integer) table.getValueAt(row, 4);
+        int modelRow = table.convertRowIndexToModel(row);
+        int stock = (Integer) table.getModel().getValueAt(modelRow, 4);
         String estado = stock == 0 ? "AGOTADO" : stock <= 5 ? "CRÍTICO" : stock <= 10 ? "ADVERTENCIA" : "ÓPTIMO";
-        if (column == 5) {
+        if (table.convertColumnIndexToModel(column) == 5) {
             setText(estado);
             setFont(getFont().deriveFont(Font.BOLD, 11f));
         }

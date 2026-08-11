@@ -7,9 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +15,8 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -57,14 +54,13 @@ public class MainFrame extends JFrame {
     private final JTextField txtPrecio = new JTextField();
     private final JTextField txtExistencia = new JTextField();
     private final JTextField txtUbicacion = new JTextField();
-    private final JTextField txtFoto = new JTextField();
-    private final JLabel vistaFoto = new JLabel("Sin fotografía", JLabel.CENTER);
+    private final JLabel lblEstado = new JLabel("Listo");
     private final JTextField txtBuscar = new JTextField();
     private final JComboBox<Categoria> cmbCategoria = new JComboBox<>();
     private final JComboBox<Categoria> cmbFiltroCategoria = new JComboBox<>();
 
     private final DefaultTableModel modelo = new DefaultTableModel(
-            new String[]{"ID", "SKU", "Producto", "Precio", "Stock", "Estado", "Ubicación", "Categoría", "Código"}, 0) {
+            new String[]{"ID", "SKU", "Producto", "Precio", "Existencias", "Estado", "Ubicación", "Categoría", "Código de barras"}, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;
@@ -178,14 +174,18 @@ public class MainFrame extends JFrame {
     private void configurarTabla() {
         tabla.setRowSorter(ordenador);
         tabla.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        tabla.setRowHeight(34);
+        tabla.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tabla.setForeground(new Color(55, 48, 72));
+        tabla.setSelectionBackground(new Color(232, 225, 255));
+        tabla.setSelectionForeground(MORADO);
+        tabla.setRowHeight(38);
         tabla.setShowVerticalLines(false);
         tabla.setGridColor(new Color(222, 228, 230));
         tabla.getTableHeader().setBackground(MORADO);
         tabla.getTableHeader().setForeground(Color.WHITE);
-        tabla.getTableHeader().setFont(tabla.getFont().deriveFont(Font.BOLD));
-        tabla.getColumnModel().getColumn(4).setCellRenderer(new StockCellRenderer());
-        tabla.getColumnModel().getColumn(5).setCellRenderer(new StockCellRenderer());
+        tabla.getTableHeader().setFont(new Font("Segoe UI Semibold", Font.BOLD, 13));
+        tabla.getColumn("Existencias").setCellRenderer(new StockCellRenderer());
+        tabla.getColumn("Estado").setCellRenderer(new StockCellRenderer());
         DefaultTableCellRenderer precio = new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object value) {
@@ -193,7 +193,8 @@ public class MainFrame extends JFrame {
             }
         };
         precio.setHorizontalAlignment(JLabel.RIGHT);
-        tabla.getColumnModel().getColumn(3).setCellRenderer(precio);
+        tabla.getColumn("Precio").setCellRenderer(precio);
+        tabla.removeColumn(tabla.getColumn("ID"));
         tabla.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tabla.getSelectedRowCount() == 1) {
                 seleccionarProducto();
@@ -202,21 +203,27 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel construirAccionesLote() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 0));
+        JPanel panel = new JPanel(new BorderLayout(10, 0));
         panel.setOpaque(false);
-        panel.add(new JLabel("Acciones para seleccionados:"));
+        JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 0));
+        acciones.setOpaque(false);
+        acciones.add(new JLabel("Acciones para seleccionados:"));
         JButton precio = boton("Cambiar precio", new Color(77, 101, 112));
         precio.addActionListener(e -> cambiarPrecioLote());
         JButton reabastecer = boton("Reabastecer", VERDE);
         reabastecer.addActionListener(e -> reabastecerLote());
-        panel.add(precio);
-        panel.add(reabastecer);
+        acciones.add(precio);
+        acciones.add(reabastecer);
+        panel.add(acciones, BorderLayout.WEST);
+        lblEstado.setForeground(new Color(91, 78, 126));
+        lblEstado.setFont(lblEstado.getFont().deriveFont(Font.BOLD, 11f));
+        panel.add(lblEstado, BorderLayout.EAST);
         return panel;
     }
 
     private JPanel construirEditor() {
         JPanel panel = tarjeta(new BorderLayout(0, 10));
-        panel.setBackground(new Color(252, 247, 255));
+        ((UiKit.RoundedPanel) panel).setColorFondo(new Color(252, 247, 255));
         panel.setPreferredSize(new Dimension(315, 650));
         JLabel titulo = new JLabel("Ficha del producto");
         titulo.setFont(titulo.getFont().deriveFont(Font.BOLD, 17f));
@@ -233,7 +240,6 @@ public class MainFrame extends JFrame {
         agregarCampo(campos, "Existencia *", txtExistencia, fila++);
         agregarCampo(campos, "Ubicación", txtUbicacion, fila++);
         agregarCampo(campos, "Categoría *", cmbCategoria, fila++);
-        agregarCampoFoto(campos, fila);
         panel.add(campos, BorderLayout.CENTER);
         panel.add(construirBotonesEditor(), BorderLayout.SOUTH);
         return panel;
@@ -268,54 +274,54 @@ public class MainFrame extends JFrame {
         c.gridy++;
         c.insets = new Insets(0, 0, 7, 0);
         campo.setPreferredSize(new Dimension(200, 29));
+        if (campo instanceof JComponent componente) {
+            estilizarCampo(componente);
+        }
         panel.add(campo, c);
     }
 
-    private void agregarCampoFoto(JPanel panel, int fila) {
-        JPanel selector = new JPanel(new BorderLayout(5, 5));
-        selector.setOpaque(false);
-        vistaFoto.setPreferredSize(new Dimension(200, 78));
-        vistaFoto.setOpaque(true);
-        vistaFoto.setBackground(new Color(239, 243, 244));
-        vistaFoto.setForeground(new Color(91, 105, 112));
-        vistaFoto.setBorder(BorderFactory.createLineBorder(new Color(215, 223, 226)));
-        selector.add(vistaFoto, BorderLayout.CENTER);
-        txtFoto.setEditable(false);
-        txtFoto.setToolTipText("Ruta de la fotografía seleccionada");
-        selector.add(txtFoto, BorderLayout.SOUTH);
-        JButton elegir = boton("…", new Color(77, 101, 112));
-        elegir.setToolTipText("Elegir fotografía del producto");
-        elegir.addActionListener(e -> elegirFoto());
-        selector.add(elegir, BorderLayout.EAST);
-        agregarCampo(panel, "Fotografía", selector, fila);
-    }
-
     private JPanel tarjeta(java.awt.LayoutManager layout) {
-        JPanel panel = new JPanel(layout);
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JPanel panel = new UiKit.RoundedPanel(layout, Color.WHITE, 20);
+        panel.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
         return panel;
     }
 
     private JButton boton(String texto, Color fondo) {
-        JButton boton = new JButton(texto);
-        boton.setBackground(fondo);
+        JButton boton = new UiKit.HoverButton(texto, fondo, aclarar(fondo), 16);
         boton.setForeground(Color.WHITE);
-        boton.setFocusPainted(false);
+        boton.setBorder(BorderFactory.createEmptyBorder(7, 13, 7, 13));
         return boton;
     }
 
     private JButton botonCircular(String texto, String ayuda, Runnable accion) {
-        JButton boton = new JButton(texto);
+        JButton boton = new UiKit.HoverButton(texto, Color.WHITE, new Color(235, 229, 255), 36);
         boton.setPreferredSize(new Dimension(36, 36));
         boton.setToolTipText(ayuda);
         boton.setForeground(MORADO);
-        boton.setBackground(Color.WHITE);
         boton.setFont(boton.getFont().deriveFont(Font.BOLD, 18f));
         boton.setFocusPainted(false);
         boton.setMargin(new Insets(0, 0, 0, 0));
         boton.addActionListener(e -> accion.run());
         return boton;
+    }
+
+    private void estilizarCampo(JComponent campo) {
+        javax.swing.border.Border reposo = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(222, 218, 232)),
+                BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        javax.swing.border.Border activo = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(NARANJA, 2),
+                BorderFactory.createEmptyBorder(3, 7, 3, 7));
+        campo.setBorder(reposo);
+        campo.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override public void focusGained(java.awt.event.FocusEvent e) { campo.setBorder(activo); }
+            @Override public void focusLost(java.awt.event.FocusEvent e) { campo.setBorder(reposo); }
+        });
+    }
+
+    private Color aclarar(Color color) {
+        return new Color(Math.min(255, color.getRed() + 24), Math.min(255, color.getGreen() + 24),
+                Math.min(255, color.getBlue() + 24));
     }
 
     private void cargar() {
@@ -387,20 +393,20 @@ public class MainFrame extends JFrame {
         txtPrecio.setText(String.valueOf(p.getPrecio()));
         txtExistencia.setText(String.valueOf(p.getExistencia()));
         txtUbicacion.setText(valor(p.getUbicacion()));
-        txtFoto.setText(valor(p.getFoto()));
-        actualizarVistaFoto(p.getFoto());
         seleccionarCategoria(p.getCategoria().getId());
     }
 
     private void guardar() {
         try {
+            boolean esNuevo = productoId == null;
             Producto producto = new Producto(productoId, txtSku.getText().trim(), txtCodigo.getText().trim(),
                     txtNombre.getText().trim(), Double.parseDouble(txtPrecio.getText().trim()),
                     Integer.parseInt(txtExistencia.getText().trim()), txtUbicacion.getText().trim(),
-                    txtFoto.getText().trim(), (Categoria) cmbCategoria.getSelectedItem());
+                    fotoActual(), (Categoria) cmbCategoria.getSelectedItem());
             service.guardarProducto(producto);
             limpiar();
             cargarProductos();
+            notificar(esNuevo ? "Producto agregado al catálogo" : "Cambios guardados");
         } catch (NumberFormatException e) {
             error("Precio y existencia deben ser valores numéricos válidos.");
         } catch (ValidationException | DataAccessException e) {
@@ -421,6 +427,7 @@ public class MainFrame extends JFrame {
                 service.eliminarProducto(productoId);
                 limpiar();
                 cargarProductos();
+                notificar("Producto eliminado");
             } catch (DataAccessException e) {
                 error(e.getMessage());
             }
@@ -439,6 +446,7 @@ public class MainFrame extends JFrame {
             }
             service.reabastecerProductos(idsSeleccionados(), cantidad);
             cargarProductos();
+            notificar("Inventario actualizado: +" + cantidad + " unidades");
         } catch (NumberFormatException e) {
             error("Ingrese una cantidad entera válida.");
         } catch (ValidationException | DataAccessException e) {
@@ -455,6 +463,7 @@ public class MainFrame extends JFrame {
         try {
             service.cambiarPrecioProductos(idsSeleccionados(), Double.parseDouble(entrada.trim()));
             cargarProductos();
+            notificar("Precio actualizado en los productos seleccionados");
         } catch (NumberFormatException e) {
             error("Ingrese un precio numérico válido.");
         } catch (ValidationException | DataAccessException e) {
@@ -480,25 +489,9 @@ public class MainFrame extends JFrame {
                 == JOptionPane.YES_OPTION;
     }
 
-    private void elegirFoto() {
-        JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File archivo = chooser.getSelectedFile();
-            txtFoto.setText(archivo.getAbsolutePath());
-            actualizarVistaFoto(archivo.getAbsolutePath());
-        }
-    }
-
-    private void actualizarVistaFoto(String ruta) {
-        if (ruta == null || ruta.isBlank() || !new File(ruta).isFile()) {
-            vistaFoto.setIcon(null);
-            vistaFoto.setText("Sin fotografía");
-            return;
-        }
-        ImageIcon original = new ImageIcon(ruta);
-        Image escalada = original.getImage().getScaledInstance(190, 72, Image.SCALE_SMOOTH);
-        vistaFoto.setText("");
-        vistaFoto.setIcon(new ImageIcon(escalada));
+    private String fotoActual() {
+        Producto actual = productoId == null ? null : productosPorId.get(productoId);
+        return actual == null ? null : actual.getFoto();
     }
 
     private void seleccionarCategoria(Integer id) {
@@ -518,8 +511,6 @@ public class MainFrame extends JFrame {
         txtPrecio.setText("");
         txtExistencia.setText("");
         txtUbicacion.setText("");
-        txtFoto.setText("");
-        actualizarVistaFoto(null);
         tabla.clearSelection();
         txtSku.requestFocus();
     }
@@ -537,6 +528,17 @@ public class MainFrame extends JFrame {
 
     private String valor(String texto) {
         return texto == null ? "" : texto;
+    }
+
+    private void notificar(String mensaje) {
+        lblEstado.setText("✓  " + mensaje);
+        lblEstado.setForeground(new Color(44, 145, 88));
+        javax.swing.Timer timer = new javax.swing.Timer(2800, e -> {
+            lblEstado.setText("Listo");
+            lblEstado.setForeground(new Color(91, 78, 126));
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     private void error(String mensaje) {

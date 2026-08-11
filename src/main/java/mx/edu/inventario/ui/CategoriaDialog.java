@@ -55,6 +55,7 @@ public class CategoriaDialog extends JDialog {
         add(form, BorderLayout.NORTH);
 
         tabla.setAutoCreateRowSorter(true);
+        tabla.removeColumn(tabla.getColumn("ID"));
         tabla.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tabla.getSelectedRow() >= 0) {
                 seleccionar(tabla.getSelectedRow());
