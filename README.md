@@ -1,40 +1,54 @@
 # Sistema de Inventario
 
-Este programa sirve para guardar productos. Se puede poner el nombre, precio, cantidad y categoría de cada producto.
+Aplicación de escritorio desarrollada en Java Swing para administrar productos y categorías almacenados en MySQL.
 
-También permite agregar, editar, buscar y borrar productos. Las categorías se pueden administrar desde el botón de la ventana principal.
+## Funciones principales
 
-## Cómo abrirlo
+- Alta, consulta, modificación y eliminación de productos y categorías.
+- Catálogo visual responsivo y tabla de inventario ordenable.
+- Búsqueda por nombre, SKU o código de barras y filtro por categoría.
+- Estados de existencia: agotado, crítico, advertencia y óptimo.
+- Dashboard con totales y gráfica del estado del stock.
+- Cambio de precio y reabastecimiento de varios productos.
+- SKU, código de barras y ubicación física en almacén.
+- Confirmaciones antes de operaciones sensibles.
+- Catálogo demostrativo con 10 categorías y 30 productos.
 
-1. Tener un servidor MySQL corriendo en tu máquina (por ejemplo con XAMPP, WAMP o MySQL Server directo).
-2. Ajustar el usuario y la contraseña en `src/main/java/mx/edu/inventario/db/DatabaseConnection.java` (constantes `USER` y `PASSWORD`) para que coincidan con tu servidor.
-3. Abrir la carpeta del proyecto en IntelliJ.
-4. Abrir el archivo `pom.xml` como proyecto Maven.
-5. Ejecutar la clase `App.java`.
+## Requisitos
 
-También se puede ejecutar desde la terminal con:
+- JDK 21 o posterior.
+- Maven 3.9 o posterior.
+- MySQL Server 8 o posterior.
+- IntelliJ IDEA, VS Code o cualquier IDE compatible con Maven (opcional).
+
+## Configuración y ejecución
+
+1. Iniciar MySQL Server.
+2. Ajustar `USER` y `PASSWORD` en `src/main/java/mx/edu/inventario/db/DatabaseConnection.java`.
+3. Abrir el proyecto como proyecto Maven.
+4. Ejecutar `mx.edu.inventario.App` o utilizar:
 
 ```bash
 mvn clean compile exec:java
 ```
 
-La primera vez necesita Internet para descargar el conector de MySQL. El programa crea solo la base de datos `inventario` y sus tablas si no existen (requiere que el servidor MySQL ya esté encendido).
+La aplicación crea la base de datos `inventario`, prepara las tablas y carga datos demostrativos sin duplicar registros existentes.
 
-## Carpetas principales
+## Estructura
 
-- `model`: clases de Producto y Categoria.
-- `dao`: consultas para guardar y leer datos.
-- `ui`: ventanas del programa.
-- `database`: script de la base de datos con ejemplos.
+- `model`: entidades del dominio.
+- `dao`: operaciones SQL y persistencia.
+- `service`: validaciones y reglas de negocio.
+- `ui`: ventanas y componentes Swing.
+- `db`: conexión, creación de tablas y datos iniciales.
+- `exception`: excepciones controladas.
+- `database`: script SQL completo para evaluación.
+- `documentation`: manual de instalación y operación en PDF.
 
-## Nota
+## Base de datos
 
-Si aparecen mensajes amarillos de SQLite o Java en la consola, no pasa nada mientras abra la ventana del programa. No afectan el funcionamiento.
+El script `database/KSHC_EOH_LRGF_SAHR_3IRD-G1.sql` crea las tablas, relaciones y 30 productos de prueba. El script elimina las tablas existentes antes de reconstruirlas, por lo que debe utilizarse en una base de evaluación o respaldo.
 
-Para subirlo a Git cuando toque:
+## Repositorio
 
-```bash
-git init
-git add .
-git commit -m "Primer avance del inventario"
-```
+https://github.com/sergioabi165/Aplicacion

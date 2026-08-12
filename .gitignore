@@ -5,3 +5,6 @@ out/
 *.class
 data/inventario.db
 .DS_Store
+tmp/
+output/
+*.zip
